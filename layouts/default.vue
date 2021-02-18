@@ -3,6 +3,7 @@
 
 
 <Profile @close="accountDrawer=false" :drawer="accountDrawer"/>
+<AddContact @close="addContactDrawer=false" :drawer="addContactDrawer"/>
 
       <v-container fluid class="py-0 px-0" >
 
@@ -13,7 +14,9 @@
             <v-row no-gutters align="start" class="fill-height" >
               <v-col cols="12" width='100%' height='60' >
 
-              <ChatHeader @accountDrawerClick="accountDrawer=!accountDrawer"/>
+              <ChatHeader @accountDrawerClick="accountDrawer=!accountDrawer"
+                @onAddContact="addContactDrawer=!addContactDrawer"
+              />
               </v-col>
               <v-col cols="12" align="start" class="overflow-y-auto" style="height: calc(100vh - 60px);">
                 <ConversationsSelector/>
@@ -105,7 +108,8 @@ export default {
     return {
       scrollHeight: 'no hay',
       alertSound: null,
-      accountDrawer: false
+      accountDrawer: false,
+      addContactDrawer: false
     }
 
   },
@@ -129,7 +133,13 @@ export default {
     identity(){
       console.log('identity changed')
       if(this.isLogged){
-       this.initXmpp({'jid':'573144016129','name':'Haritol','password':'123456789'})
+        if(this.jid){
+          let nombre = this.nombre ? this.nombre : this.jid
+          this.initXmpp({'jid':this.jid,'name':nombre,'password':'123456789'})
+        }else{
+          console.log('No hay jid')
+        }
+       
       }
     }
 
@@ -237,6 +247,8 @@ export default {
       isInfoShowed: state => state.isInfoShowed,
 
       identity: state => state.auth.identity,
+      jid: state => state.auth.identity.data.jid,
+      nombre: state => state.auth.identity.data.nombre,
 
       conversations: state => state.chat.conversations,
       alert_pending: state => state.chat.alert_pending,

@@ -22,12 +22,14 @@
               <v-avatar v-if="conversation.icon">
                 <img
                   :src="`avatars/${conversation.icon}.png`"
-                  alt="John"
                 >
               </v-avatar>
-              <v-avatar v-else >
-               <span class="white--text headline" :title='conversation._id'>
-               id:{{conversation._id}}</span>
+              <v-avatar v-else-if="conversation.nickname" >
+               <span class="white--brown headline">{{conversation.nickname.substring(0,1)}}</span>
+              </v-avatar>
+
+              <v-avatar v-else="conversation._id" >
+               <span class="white--brown headline">{{conversation._id.substring(0,1)}}</span>
               </v-avatar>
           </v-badge>
 

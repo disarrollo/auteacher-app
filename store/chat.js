@@ -288,8 +288,15 @@ export const mutations = {
   	setCurrentConversation: (state, value) => {
     	state.current_conversation_id = value;
   	},
-  	addConversation : (state, value) => {
-  		state.conversations.push(value)
+  	addConversation : (state, payload) => {
+
+  		let c = {
+			_id: payload.conversation_id,
+			nickname: payload.nickname,
+			newMessageCounter: 0,
+			messages:[]
+		}
+  		state.conversations.push(c)
   	},
   	addMessage: (state, message) => {
 		

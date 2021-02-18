@@ -41,6 +41,9 @@
         <v-list-item link>
           <v-list-item-title >Configuración</v-list-item-title>
         </v-list-item>
+        <v-list-item link @click="$emit('onAddContact')">
+          <v-list-item-title >Agregar contacto</v-list-item-title>
+        </v-list-item>
         <v-list-item link @click="cerrar">
           <v-list-item-title >Cerrar</v-list-item-title>
         </v-list-item>

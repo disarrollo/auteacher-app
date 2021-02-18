@@ -1,3 +1,5 @@
+Almacenar / Recuperar nickname
+
 Gestión de Version
 
 Escribir script para iniciar base de datos con indices

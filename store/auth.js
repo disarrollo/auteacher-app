@@ -8,6 +8,8 @@ export const state = () => ({
   identity: {
     uid:null,
     data:{
+      jid:null,
+      nombre:null,
       tratamiento: null,
       privileges:[],
       //authenticated: false,
@@ -428,6 +430,8 @@ export const mutations = {
       state.identity = {
         uid:null,
         data:{
+          jid:null,
+          nombre:null,
           tratamiento: null,
           privileges:[],
           //authenticated: false,

@@ -6,12 +6,20 @@
       <v-list-item  class="px-0">
 
           <v-list-item-avatar>
-            <v-avatar v-if="conversation.icon">
-              <img
-                :src="`avatars/${conversation.icon}.png`"
-                alt="John"
-              >
-            </v-avatar>
+            
+             <v-avatar v-if="conversation.icon">
+                <img
+                  :src="`avatars/${conversation.icon}.png`"
+                >
+              </v-avatar>
+              <v-avatar v-else-if="conversation.nickname" >
+               <span class="white--brown headline">{{conversation.nickname.substring(0,1)}}</span>
+              </v-avatar>
+
+              <v-avatar v-else="conversation._id" >
+               <span class="white--brown headline">{{conversation._id.substring(0,1)}}</span>
+              </v-avatar>
+
           </v-list-item-avatar>
 
           <v-list-item-content>
