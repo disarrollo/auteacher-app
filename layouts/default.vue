@@ -274,17 +274,10 @@ export default {
       
     },
 
-    nombre(){
-      if(this.perfil && this.perfil.tratamiento){
-        return this.perfil.tratamiento
-      }else if(this.identity.data.tratamiento){
-        return this.identity.data.tratamiento
-      }
-      return 'Mi cuenta'
-    },
+    
     
     title(){
-      return 'Epica Bikes'
+      return 'AuTeacher'
     },
 
     isErrorDialogShowed:{
