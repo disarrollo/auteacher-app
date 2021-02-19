@@ -1,7 +1,8 @@
 
 <template>
 	    	
-	 <v-list-item   style="border-bottom: 1px solid #dadada" @click="selectConversation">
+	 <v-list-item style="border-bottom: 1px solid #dadada" @click="selectConversation"
+   :class="(selectedConversation && selectedConversation._id)==conversation._id?'conversationSelected':''" >
 
       <v-list-item-icon class="my-2">
 
@@ -91,7 +92,7 @@ export default {
       
     }),
     ...mapGetters({
-      
+      selectedConversation: 'chat/getCurrentConversation', 
     }),
     lastMessageBody(){
       if(this.conversation.messages.length>0){
@@ -119,5 +120,8 @@ export default {
 </script>
 <style>
   
+.conversationSelected{
+  background-color: #ededed;
 
+}
 </style>

@@ -163,7 +163,9 @@ console.log(response);
 
   		commit('setJid',payload.jid);
   		commit('setName',payload.name);
-
+if(this.xmpp){
+	return
+}
     	xmpp = client({
 			  //service: "ws://xmpp.extandar.com:5280/xmpp-websocket",
 			  service: "wss://xmpp.extandar.com:5443/ws",
@@ -304,11 +306,22 @@ export const mutations = {
 		console.log(message)
 		message.time = moment().format('LT')
 
-    	let c = state.conversations.find(element=>{
+    	let index = state.conversations.findIndex(element=>{
 	    	return element._id == message.conversation_id
 	    })
-    	if(c == undefined){
-    		//Hay que crear la conversacion
+	    let c = null
+    	if(index >= 0){
+    		c = state.conversations[index]
+
+    		//Si el mensaje es recibido y la conversacion no esta en el inicio
+    		if(state.jid == message.to && index > 0){
+	    		//Enviar la conversacion al inicio del arreglo
+	    		c = state.conversations.splice(index,1)
+	    		c = c[0]
+		    	state.conversations.unshift(c)	
+	    	}
+    	}else{
+    		//Hay que crear la conversacion al inicio del arreglo
     		c = {
     			_id: message.conversation_id,
 				icon: message.from,
@@ -316,14 +329,19 @@ export const mutations = {
 				newMessageCounter: 0,
 				messages:[]
     		}
-    		state.conversations.push(c)    		
+    		state.conversations.unshift(c)    		
     	}
     	c.messages.push(message)
+
+    	//De aqui en adelande no usar index debia a que se ha reestructurado el arreglo
+    	//Si el mensaje es recibido
     	if(state.jid == message.to){
+    		//Se incrementa el contador de mensajes nuevos
     		c.newMessageCounter++	
+    		//Seteamos una alerta pendiente para emitir sonido y/o notificacion
     		state.alert_pending = true
     	}
-    	
+
   	},
   	setAlertPending: (state, value) => {
     	state.alert_pending = value;
@@ -349,7 +367,7 @@ export const mutations = {
   			let m = c.messages.filter(element=>{
 		    	return status == 'delivered'
 		    })
-console.log('calculateNewMessages:'+m.length)
+
 	    	c.newMessageCounter = m.length;
 	    }
 

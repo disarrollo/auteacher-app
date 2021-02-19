@@ -171,9 +171,11 @@ export default {
       hideWarning: 'hideWarning',
       showLoginDialog:  'auth/showLoginDialog',
       setAlertPending:  'chat/setAlertPending',
+      setCurrentConversation:  'chat/setCurrentConversation',
     }),
     hideConversation(){
       this.seccion = 'selector'
+      this.setCurrentConversation(null)
     },
     showConversation(){
       this.seccion = 'conversation'

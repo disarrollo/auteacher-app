@@ -5,17 +5,19 @@
 	    	
 	
 		<v-list>
-
+<!--
 			<v-list-item-group
 		        v-model="selectedItem"
 		        active-class="conversationSelected"
 		      >
-
+-->
 			<div v-for="conversation in conversations">
 				<ConversationsSelectorItem :conversation="conversation" 
         @onSelectConversation="$emit('onSelectConversation')"/>
 			</div>
+      <!--
 			</v-list-item-group>
+    -->
 		</v-list>
 	
   
@@ -68,8 +70,5 @@ export default {
 </script>
 <style>
   
-.conversationSelected{
-	background-color: #ededed;
 
-}
 </style>

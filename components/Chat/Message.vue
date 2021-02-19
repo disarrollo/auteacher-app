@@ -50,7 +50,7 @@ export default {
               this.calculateNewMessages(this.message.conversation_id)
               this.setAlertPending(false)
 
-        },1000)  
+        },500)  
       
     }
     
