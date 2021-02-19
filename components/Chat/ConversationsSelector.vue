@@ -12,7 +12,8 @@
 		      >
 
 			<div v-for="conversation in conversations">
-				<ConversationsSelectorItem :conversation="conversation"/>
+				<ConversationsSelectorItem :conversation="conversation" 
+        @onSelectConversation="$emit('onSelectConversation')"/>
 			</div>
 			</v-list-item-group>
 		</v-list>

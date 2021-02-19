@@ -8,7 +8,7 @@ let brw = process.browser;
     isInfoShowed: false,
     isErrorShowed: false,
     isWarningShowed: false,
-    appVersion: '1.0.0',
+    appVersion: '1.0.1',
     debugEnabled: false,
     //Modulos
     authEnabled: false

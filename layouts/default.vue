@@ -1,14 +1,20 @@
 <template>
   <v-app>
 
+<v-navigation-drawer fixed v-model="accountDrawer" :width="isMobile?'100%':'34%'">
+  <Profile @close="accountDrawer=false" />
+</v-navigation-drawer>
 
-<Profile @close="accountDrawer=false" :drawer="accountDrawer"/>
-<AddContact @close="addContactDrawer=false" :drawer="addContactDrawer"/>
+<v-navigation-drawer fixed v-model="addContactDrawer" :width="isMobile?'100%':'34%'">
+  <AddContact @close="addContactDrawer=false" />      
+</v-navigation-drawer>
+
+
 
       <v-container fluid class="py-0 px-0" >
 
         <v-row no-gutters >
-          <v-col cols="4" style="border-right: 1px solid #dadada"> 
+          <v-col :class="seccion!='selector'?'hidden-sm-and-down':''" cols="12" md="4" style="border-right: 1px solid #dadada"> 
 
             <v-container align="start" class="fill-height py-0 px-0"  >  
             <v-row no-gutters align="start" class="fill-height" >
@@ -19,7 +25,7 @@
               />
               </v-col>
               <v-col cols="12" align="start" class="overflow-y-auto" style="height: calc(100vh - 60px);">
-                <ConversationsSelector/>
+                <ConversationsSelector @onSelectConversation="showConversation"/>
               
               </v-col>
             </v-row>            
@@ -27,14 +33,14 @@
 
           </v-col>
 
-          <v-col  cols="8" style="display:'table-column';   height: calc(100vh);" >
+          <v-col :class="seccion!='conversation'?'hidden-sm-and-down':''" cols="12" md="8"  style="height: calc(100vh);" >
 
 
             <v-container align="start" class="fill-height py-0 px-0"  >  
             <v-row v-for="c in conversations" :key="c._id" 
             v-if="selectedConversation && selectedConversation._id == c._id" no-gutters align="start" class="fill-height" >
               <v-col cols="12" width='100%' height='60' >
-              <ConversationHeader :conversation="c"/>
+              <ConversationHeader :conversation="c" @onCloseConversation="hideConversation"/>
               <!--
               <div style="z-index:9999;position: absolute;top: 100px; height: 100px;width: 100px;">
  mensajesLenght:{{mensajesLength}}
@@ -109,7 +115,8 @@ export default {
       scrollHeight: 'no hay',
       alertSound: null,
       accountDrawer: false,
-      addContactDrawer: false
+      addContactDrawer: false,
+      seccion: 'selector'//selector|conversation
     }
 
   },
@@ -165,6 +172,12 @@ export default {
       showLoginDialog:  'auth/showLoginDialog',
       setAlertPending:  'chat/setAlertPending',
     }),
+    hideConversation(){
+      this.seccion = 'selector'
+    },
+    showConversation(){
+      this.seccion = 'conversation'
+    },
     alertar(){
       console.log('alertar')
 
@@ -321,29 +334,17 @@ export default {
       }
     },
 
-    items () {
-      let items = [
-      {value:1},
-      {value:2},
-      {value:3},
-      {value:4},
-      {value:5},
-      ]
-      return items
-    
-      },
-
-    heightLeft() {
-      //return this.isDevice ? window.innerHeight + 'px' : 'calc(100vh - 80px)'
-      return 'calc(100vh - 60px)'
+    isMobile(){
+      
+      switch(this.$vuetify.breakpoint.name){
+          case 'xs': return true
+          case 'sm': return true
+          case 'md': return false
+          case 'lg': return false
+          case 'xl': return false
+      }
+      
     },
-    heightRight() {
-      //return this.isDevice ? window.innerHeight + 'px' : 'calc(100vh - 80px)'
-      return 'calc(100vh - 120px)'
-    },
-    
-    
-
     topBarStyles(){
       return [
         //{'background-color':'#ededed'},

@@ -1,11 +1,5 @@
 <template>
-  <v-navigation-drawer 
-      v-model="drawer"
-      width="34%"
-      fixed
-      app
-    >
-
+  <div>
   	<v-app-bar color="#01bfa5" dark height="100" flat >
       <v-btn  icon @click="$emit('close')">
         <v-icon>mdi-arrow-left</v-icon>
@@ -29,8 +23,22 @@
         </v-col>
         
       </v-row>
+
     </v-container>
-  </v-navigation-drawer>
+
+    <v-footer padless>
+          <div class="px-6 py-2">
+            <p class="mb-0">
+              2021 — <strong>Auteacher</strong>
+            </p>
+            <p class="my-0">
+              <span class="text-caption grey--text">Version {{appVersion}}</span>    
+            </p>
+          
+          </div>
+    </v-footer>
+
+  </div>
 </template>
 
 <script>
@@ -41,7 +49,7 @@ export default {
 	
   
   props: {
-    drawer: Boolean
+    
   },
   data () {
     return {
@@ -68,11 +76,12 @@ export default {
     ...mapState({
       jid: state => state.chat.jid,
       name: state => state.chat.name,
+      appVersion: state => state.appVersion,
     }),
     ...mapGetters({
       
     }),
-
+    
 
   },
 }

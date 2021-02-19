@@ -1,11 +1,6 @@
 <template>
-  <v-navigation-drawer 
-      v-model="drawer"
-      width="34%"
-      fixed
-      app
-    >
-
+  
+<div>
   	<v-app-bar color="#01bfa5" dark height="100" flat >
       <v-btn  icon @click="$emit('close')">
         <v-icon>mdi-arrow-left</v-icon>
@@ -36,7 +31,7 @@
         
       </v-row>
     </v-container>
-  </v-navigation-drawer>
+  </div>
 </template>
 
 <script>
@@ -47,7 +42,7 @@ export default {
 	
   
   props: {
-    drawer: Boolean
+    
   },
   data () {
     return {
@@ -92,6 +87,7 @@ export default {
       
     }),
 
+    
 
   },
 }

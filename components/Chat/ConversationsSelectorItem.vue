@@ -1,7 +1,7 @@
 
 <template>
 	    	
-	 <v-list-item   style="border-bottom: 1px solid #dadada" @click="setCurrentConversation(conversation._id)">
+	 <v-list-item   style="border-bottom: 1px solid #dadada" @click="selectConversation">
 
       <v-list-item-icon class="my-2">
 
@@ -79,7 +79,10 @@ export default {
     ...mapMutations({ 
       setCurrentConversation:  'chat/setCurrentConversation',
     }),
-
+    selectConversation(value){
+      this.setCurrentConversation(this.conversation._id)
+      this.$emit('onSelectConversation')
+    }
    
     
   },

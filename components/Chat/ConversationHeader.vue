@@ -2,10 +2,13 @@
 <template>
         
     <v-toolbar flat :style="topBarStyles">
-
+      <v-btn class="d-md-none" icon @click="$emit('onCloseConversation')">
+            <v-icon >mdi-arrow-left</v-icon>
+      </v-btn>
       <v-list-item  class="px-0">
 
           <v-list-item-avatar>
+            
             
              <v-avatar v-if="conversation.icon">
                 <img
