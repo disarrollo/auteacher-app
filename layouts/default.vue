@@ -144,6 +144,7 @@ export default {
   },
   mounted(){
     this.initIdentity()
+    this.searchUpdates()
   },
   watch:{
     alert_pending(){
@@ -179,6 +180,7 @@ export default {
 
   methods:{
     ...mapActions({
+        searchUpdates: 'searchUpdates',
         initIdentity: 'auth/initIdentity',
         initXmpp: 'chat/initXmpp',
         logout: 'auth/logout',

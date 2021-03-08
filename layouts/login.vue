@@ -54,11 +54,11 @@ export default {
   },
   mounted(){
     this.initIdentity()
-
-    
+    this.searchUpdates()
   },
   methods:{
     ...mapActions({
+        searchUpdates: 'searchUpdates',
         initIdentity: 'auth/initIdentity',
       }),
 

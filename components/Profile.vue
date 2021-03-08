@@ -34,9 +34,13 @@
             <p class="my-0">
               <span class="text-caption grey--text">Version {{appVersion}}</span>    
             </p>
+            <p class="my-0" v-if="update">
+              <span class="text-caption grey--text">Actualizacion encontrada: {{update}} </span>
+              <v-btn text x-small @click="actualizar">Actualizar</v-btn>
+            </p>
             
           </div>
-          <div class="px-6 py-2" v-if="allowDebug">
+          <div class="px-6 py-2" v-if="allowDebug" style="display: block;">
             <DebugButtons/>
           </div>
     </v-footer>
@@ -65,12 +69,17 @@ export default {
   },
   methods:{
     ...mapActions({
-        
+          
       }),
 
     ...mapMutations({ 
       
     }),
+
+    actualizar(){
+      console.log("actualizando")
+      window.location.reload(true);
+    }
 
     
     
@@ -80,6 +89,7 @@ export default {
       jid: state => state.chat.jid,
       name: state => state.chat.name,
       appVersion: state => state.appVersion,
+      update: state => state.update,
       allowDebug: state => state.auth.identity.data.debug,
     }),
     ...mapGetters({

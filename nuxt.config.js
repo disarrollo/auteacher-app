@@ -82,21 +82,21 @@ export default {
     },
     */
     icon: {
-      fileName: 'logo_auteacher.png'
+      fileName: 'assisted_logo.png'
     },
     manifest: {
-      name: 'app.auteacher.com',
-      short_name: 'AuTeacher',
+      name: 'Assisted Education',
+      short_name: 'assisted.education',
       description:
-        'Automatic Teacher - Sistema de apoyo en el proceso educativo',
+        'Complemento tecnológico en el proceso de enseñanza presencial',
       lang: 'es',
       start_url: '/'
     },
     meta: {
       author: 'Disarrollo Software SAS',
-      name: 'AuTeacher',
+      name: 'Assisted Education',
       description:
-        'Automatic Teacher',
+        'Complemento tecnológico en el proceso de enseñanza presencial',
       lang: 'es'
     }
   },

@@ -13,6 +13,12 @@ export default function ({redirect, store }) {
   	store.commit('auth/setIdentity')	
   	
   }
+
+  if(process.env.APP_VERSION){
+    console.log('loading app version')
+    store.commit('setVersion',process.env.APP_VERSION)  
+    
+  }
   
 
 }

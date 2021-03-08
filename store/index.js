@@ -9,6 +9,7 @@ let brw = process.browser;
     isErrorShowed: false,
     isWarningShowed: false,
     appVersion: '1.0.2',
+    update: null,
     debugEnabled: false,
     //Modulos
     authEnabled: false
@@ -19,6 +20,30 @@ let brw = process.browser;
       if(brw){
         location.reload()
       }
+    },
+    searchUpdates ({commit})  {
+      if(brw){
+        return new Promise((resolve, reject) => {
+          this.$axios.post(process.env.API_URL+'version')
+            .then(response => {
+              if(response.data.result_set){
+                this.dispatch('searchUpdatesCallback',response.data.result_set)
+              }
+              resolve(response.data.result_set)
+            })
+            .catch(response => {
+                console.log('Error:')
+                console.log(response)
+                //reject(response)
+            })
+        });
+      }
+    },
+    searchUpdatesCallback ({commit}, result_set)  {
+      if(result_set.version){
+        commit('setUpdate',result_set.version);  
+      }
+
     },
   }
 
@@ -56,8 +81,8 @@ let brw = process.browser;
       //},3000)
     },
     */
-    setVersion:  (state, response) => {
-      state.version = response.version
+    setVersion:  (state, value) => {
+      state.appVersion = value
     },
     
     showError:  (state) => {
@@ -101,6 +126,13 @@ let brw = process.browser;
     setAuthModule: (state, value) => {
       console.log('setAuthModule:'+value)
       state.authEnabled = value
+    },
+
+    setUpdate: (state, value) => {
+      if(value!=state.appVersion){
+        state.update = value  
+      }
+      
     },
 
   }
