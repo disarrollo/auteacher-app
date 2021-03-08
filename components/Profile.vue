@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div width="100%">
   	<v-app-bar color="#01bfa5" dark height="100" flat >
       <v-btn  icon @click="$emit('close')">
         <v-icon>mdi-arrow-left</v-icon>
@@ -34,7 +34,10 @@
             <p class="my-0">
               <span class="text-caption grey--text">Version {{appVersion}}</span>    
             </p>
-          
+            
+          </div>
+          <div class="px-6 py-2" v-if="allowDebug">
+            <DebugButtons/>
           </div>
     </v-footer>
 
@@ -77,6 +80,7 @@ export default {
       jid: state => state.chat.jid,
       name: state => state.chat.name,
       appVersion: state => state.appVersion,
+      allowDebug: state => state.auth.identity.data.debug,
     }),
     ...mapGetters({
       

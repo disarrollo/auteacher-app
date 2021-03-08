@@ -37,8 +37,14 @@ export default {
   props: {
 		conversation: Object
   },
+  
+  created(){
+  	console.log('created conversation:'+this.conversation._id)
+    this.recoverMessages(this.conversation._id)
+  },
+
   mounted(){
-  	console.log('mounted conversation:'+this.conversation._id)
+    console.log('mounted conversation:'+this.conversation._id)
     this.$emit('bajar')
   },
   watch:{
@@ -61,6 +67,7 @@ export default {
 
     ...mapMutations({ 
       resetMessageCounter:  'chat/resetMessageCounter',
+      recoverMessages:  'chat/recoverMessages',
       
     }),
 

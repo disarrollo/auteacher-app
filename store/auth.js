@@ -15,7 +15,8 @@ export const state = () => ({
       //authenticated: false,
       //anonimo: true,
       device: null,
-      empresa: null
+      empresa: null,
+      debug: false
     }
   },
   loading:false,
@@ -425,7 +426,11 @@ export const mutations = {
       if(device_id && device_id == state.identity.data.device ){
         state.dispositivo_seguro = true
       }
-
+      //OJO
+      if(state.identity.data.jid=='573144016129'){
+        state.identity.data.debug = true  
+      }
+      
     } else {
       state.identity = {
         uid:null,
@@ -437,7 +442,8 @@ export const mutations = {
           //authenticated: false,
           //anonimo: true,
           device: false,
-          empresa: false 
+          empresa: false,
+          debug: false
         }
       }
     }

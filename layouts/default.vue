@@ -93,6 +93,28 @@
         </v-row>
       </v-container>
       
+
+      <v-snackbar v-model="isInfoDialogShowed">
+        {{ info }}
+        <v-btn color="success" text @click="hideInfo">
+          Close
+        </v-btn>
+      </v-snackbar>
+      
+      <v-snackbar v-model="isErrorDialogShowed">
+        {{ error }}
+        <v-btn color="error" text @click="hideError">
+          Close
+        </v-btn>
+      </v-snackbar>
+
+      <v-snackbar v-model="isWarningDialogShowed">
+        {{ warning }}
+        <v-btn color="info" text @click="hideWarning">
+          Close
+        </v-btn>
+      </v-snackbar>
+      
   </v-app>
 
 </template>
@@ -131,7 +153,7 @@ export default {
               this.alertar()  
             }
             this.setAlertPending(false)
-        },3000)   
+        },1000)   
       }
     },
     selectedConversation(){

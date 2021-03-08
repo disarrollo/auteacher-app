@@ -4,7 +4,10 @@ export default function ({ $axios, redirect, store }) {
     if (window.localStorage.getItem('USRTKN')) {
       request.headers.common['Authorization'] = 'Bearer '+window.localStorage.getItem('USRTKN')
     }
-    request.headers.common['BUSINESS_KEY'] = 'PROFESORCHAT'
+    if(process.env.DATABASE){
+      request.headers.common['BUSINESS_KEY'] = process.env.DATABASE
+    }
+    
   })
 
   $axios.onResponse(response => {
@@ -75,20 +78,17 @@ export default function ({ $axios, redirect, store }) {
             store.commit('auth/restartAuthenticationProcess')
 
           }else if(error.response.data.error.message.internal_code == 'ALREADY_AUTHENTICATED'){
-            //YA SE ENCUENTRA AUTENTICADO
-            //IMPROBABLE EN CLIENTE VERDADERO
 
           }else if(error.response.data.error.message.internal_code == 'INCOMPLETED_INPUT'){
-            //INFORMACION INCOMPLETA
-            //IMPROBABLE EN CLIENTE VERDADERO
 
+          }else if(error.response.data.error.message.internal_code == 'EMAIL_NO_EXIST'){
+          
           }else {
             //OTROS ERRORES
-            console.log('internal_code:'+error.response.data.error.message.internal_code)
             //store.dispatch('auth/resetUser')
             //store.dispatch('auth/verifyUser')
-
           }
+          console.log('internal_code:'+error.response.data.error.message.internal_code)
         }
 
         if(error.response.data.error.message.info){

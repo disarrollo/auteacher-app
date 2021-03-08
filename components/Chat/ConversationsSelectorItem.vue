@@ -95,8 +95,14 @@ export default {
       selectedConversation: 'chat/getCurrentConversation', 
     }),
     lastMessageBody(){
+      let text
       if(this.conversation.messages.length>0){
-        return this.conversation.messages[this.conversation.messages.length-1].body  
+        text =  this.conversation.messages[this.conversation.messages.length-1].body
+        if(text.length>35){
+          text = text.substring(0,35)
+          text = text+' ...'
+        }
+        return text
       }else{
         return ''
       }

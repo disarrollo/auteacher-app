@@ -14,6 +14,7 @@ let xmpp = null;
 export const state = () => ({
 	jid: null,
 	name:null,
+	domain: 'xmpp.extandar.com',
 	alert_pending: false,
 	current_conversation_id: null,
 	xmpp_status: 'offline',
@@ -56,6 +57,11 @@ export const actions = {
 
     insertMessage({commit,state}, message){
     	commit('addMessage',message);
+    	commit('saveMessages',message.conversation_id);
+    },
+    insertConversation({commit,state}, payload){
+    	commit('addConversation',payload);
+    	commit('recoverMessages',payload.conversation_id);
     },
 
     sendMessage({commit,state}, payload){
@@ -68,7 +74,8 @@ export const actions = {
 	    const ahora = new Date()
 	    payload._id = ahora.getTime()
 	    
-	    commit('addMessage',payload);
+	    this.dispatch('chat/insertMessage',payload)
+	    
 
 	    //Enviamos al servidor
 		const messageXmpp = xml(
@@ -90,12 +97,35 @@ export const actions = {
 
     },
 
+    async addContact({commit,state}, payload){
+    	console.log('adding contact to roster')
+    	const {iqCaller} = this.xmpp
+		const response = await iqCaller.request(
+		  	xml(
+			  	"iq", 
+			  	{ type: "set" }, 
+			  	xml(
+			  		"query", "jabber:iq:roster",
+			  		xml(
+				  		"item", { jid: `${payload.jid}@${state.domain}`, name: payload.nickname}, 
+			  		)
+		  		)
+	  		),
+		  	30 * 1000, 
+		);
+
+		console.log('addContact response:')
+		console.log(response)
+    },
+
     async getRoster({commit,state}){
 
-	    console.log('enviando...')
+	    console.log('requesting roster...')
 	    
 	    const {iqCaller} = this.xmpp
 
+	    /*
+	    //Otro metodo que no funciono bien
 	    //Enviamos al servidor
 		const messageXmpp = xml(
 		    "iq",
@@ -108,17 +138,67 @@ export const actions = {
 		)
 
 		console.log(messageXmpp)
-
 		//this.xmpp.send(messageXmpp);
+		*/
 
-
+		//Metodo que espera la stanza de respuesta para procesarla aqui mismo
 		const response = await iqCaller.request(
-  xml("iq", { type: "get" }, xml("query", "jabber:iq:roster")),
-  30 * 1000, // 30 seconds timeout - default
-);
+		  xml("iq", { type: "get" }, xml("query", "jabber:iq:roster")),
+		  30 * 1000, // 30 seconds timeout - default
+		);
 
-console.log('response:');
-console.log(response);
+		console.log('procesing roster...')
+		console.log(response)
+
+		if(response.attrs.type==='result'){
+			
+			let query = response.getChild('query')
+
+			if(query){
+				
+				let xmlns = query.attrs.xmlns
+
+				if(xmlns=='jabber:iq:roster'){
+
+					let roster = query.getChildren('item')
+					
+					console.log(roster.length+' contacts founded')
+
+					for(let i in roster){
+						let item = roster[i]
+						
+						let subscription = item.attrs.subscription
+						console.log('subscription:'+subscription)
+
+						let jid = item.attrs.jid
+						jid = jid.split('@')[0]	
+						
+						let nickname = item.attrs.name?item.attrs.name:jid
+
+						let conversation = {
+							conversation_id : jid,
+    						nickname : nickname
+						}
+
+						this.dispatch('chat/insertConversation', conversation) 
+					}
+
+				}else{
+					console.log('ERROR - xmlns desconocido')
+					console.log('xmlns:'+xmlns)
+				}
+				
+			}else{
+				console.log('ERROR -  No hay query:')
+				console.log(response)		
+			}
+		}else{
+			console.log('ERROR - response si not result:')
+			console.log(response)
+
+		}
+
+
 
     },
 
@@ -163,14 +243,18 @@ console.log(response);
 
   		commit('setJid',payload.jid);
   		commit('setName',payload.name);
-if(this.xmpp){
-	return
-}
+
+  		//Evitar que se duplique el objeto
+		if(this.xmpp){
+			return
+		}
+
+		let device_id = window.localStorage.getItem('DVCID')?window.localStorage.getItem('DVCID'):'NODVCID'
     	xmpp = client({
 			  //service: "ws://xmpp.extandar.com:5280/xmpp-websocket",
 			  service: "wss://xmpp.extandar.com:5443/ws",
 			  domain: "xmpp.extandar.com",
-			  resource: "AuTeacherApp",
+			  resource: "AuTeacherApp"+device_id,
 			  username: state.jid,
 			  password: payload.password,
 		});
@@ -197,16 +281,18 @@ xmpp.on("stanza", async (stanza) => {
 	  		console.log(stanza)
 	  		let body = stanza.getChild("body")
 
+	  		let from = stanza.attrs.from.split('@')[0]
+		  	let to = stanza.attrs.to.split('@')[0]
+
 	  		if(body && body.text()){
 
-	  			let text = stanza.getChild("body").text()
+	  			let text = stanza.getChild("body")?stanza.getChild("body").text():null
+	  			let hint = stanza.getChild("hint")?stanza.getChild("hint").text():null
+	  			let body_type = stanza.getChild("body_type")?stanza.getChild("body_type").text():null
 
 		  		let id = stanza.attrs.id
 
 		  		console.log('id:'+id)
-
-		  		let from = stanza.attrs.from.split('@')[0]
-		  		let to = stanza.attrs.to.split('@')[0]
 
 		  		let nickname = from
 		  		if(stanza.getChild("nickname")){
@@ -221,15 +307,51 @@ xmpp.on("stanza", async (stanza) => {
 					body: text,
 					status: 'delivered',
 					conversation_id: from,
-					nickname: nickname
+					//nickname: nickname
+					hint: hint,
+					body_type: body_type,
 		  		}
 		  		
-
-
 		  		this.dispatch('chat/insertMessage',mensaje)
 	  		}else{
 	  			console.log("+++NO HAY BODY+++")
-	  			console.log(stanza)
+	  			
+	  			let	requestText = stanza.getChild("request")?stanza.getChild("request").text():null
+		  			
+	  			if(requestText){
+	  				if(requestText=='addToRoster'){
+	  					console.log('IS REQUEST FOR ADD ROSTER ITEM')
+	  					let jid = stanza.getChild("jid")
+	  					if(jid){
+	  						jid = jid.text()
+	  					}else{
+	  						console.log('jid NOT FOUND')
+	  					}
+
+	  					let nickname = stanza.getChild("nickname")
+	  					if(nickname){
+	  						nickname = nickname.text()
+	  					}else{
+	  						console.log('nickname NOT FOUND')
+	  					}
+	  					
+	  					if(jid && nickname){
+	  						console.log('Item to add:'+jid+':'+nickname)
+	  						this.dispatch('chat/addContact', {jid:jid,nickname:nickname}) 
+	  					}else{
+	  						console.log("ERROR - INCOMPLETE DATA")
+	  						console.log(stanza)
+	  					}
+						
+	  				}else{
+	  					console.log("ERROR - UNKNOW REQUEST:"+requestText)
+	  				}
+					
+		  		}else{
+		  			console.log("ERROR - MENSAJE NO COMPRENDIDO")
+		  			console.log(stanza)	
+		  		}
+
 	  		}
 	  	}if(stanza.attrs.type==='error'){
 	  		console.log("+++Error en stanza +++")
@@ -241,7 +363,67 @@ xmpp.on("stanza", async (stanza) => {
 		  	console.log('to:'+stanza.attrs.to)
 		  	console.log(stanza)
 	  	}
-	  		
+	  			
+	}else if (stanza.is("presence")) {
+		console.log('is presence')
+		console.log(stanza)
+	}else if (stanza.is("iq")) {
+		console.log('is iq')
+		
+		if(stanza.attrs.type==='result'){
+			/*
+			console.log('is iq result')
+			
+			let query = stanza.getChild('query')
+
+			if(query){
+				console.log('child query founded')
+				
+				let xmlns = query.attrs.xmlns
+
+				if(xmlns=='jabber:iq:roster'){
+					console.log('is result of roster query')
+
+					let roster = query.getChildren('item')
+					
+					for(let i in roster){
+						let item = roster[i]
+						
+						let subscription = item.attrs.subscription
+						console.log('subscription:'+subscription)	
+
+						if(subscription=='from'){
+
+							let jid = item.attrs.jid
+							jid = jid.split('@')[0]
+							console.log('jid:'+jid)	
+
+							commit('addConversation',{
+								conversation_id : jid,
+        						nickname : jid
+							});
+						}
+						
+					}
+
+				}else{
+					console.log('xmlns desconocido')
+					console.log('xmlns:'+xmlns)
+				}
+				
+			}else{
+				console.log('No hay query')
+					
+			}
+			*/
+		}else if(stanza.attrs.type==='set'){
+			console.log('query is set')
+		}else{
+			console.log('stanza.attrs.type:')
+			console.log(stanza.attrs.type)
+		}
+		
+		
 	}else{
 	  	console.log('is not message')
 	  	console.log(stanza)
@@ -256,7 +438,11 @@ xmpp.on("online", async (address) => {
   this.dispatch('chat/onOnline')
 });
 
-xmpp.start().catch(console.error);
+xmpp.start()
+.then(()=>{
+	this.dispatch('chat/getRoster')
+})
+.catch(console.error);
 
 
 this.xmpp = xmpp
@@ -290,15 +476,55 @@ export const mutations = {
   	setCurrentConversation: (state, value) => {
     	state.current_conversation_id = value;
   	},
+  	saveMessages : (state, conversation_id) => {
+  		console.log('saving messages...')
+  		let c = state.conversations.find(element=>{
+	    	return element._id == conversation_id
+	    })
+	    if(c!=undefined){
+	    	let messages = JSON.stringify(c.messages)
+  			window.localStorage.setItem('M-'+conversation_id,messages)	
+	    }else{
+	    	console.log('I can not save messages, conversation not found:'+conversation_id)
+	    }
+
+  	},
+
+  	recoverMessages : (state, conversation_id) => {
+  		console.log('recovering for:'+conversation_id)
+  		let messages = window.localStorage.getItem('M-'+conversation_id)
+
+  		if(messages){
+  			let c = state.conversations.find(element=>{
+		    	return element._id == conversation_id
+		    })
+
+	  		if(c!=undefined){
+	  			c.messages = JSON.parse(messages)
+	  		}else{
+	  			console.log('I can not recover messages, conversation not found:'+conversation_id)
+	  		}
+  		}else{
+  			console.log('There are not messages for:'+conversation_id)
+  		}
+  		
+  	},
   	addConversation : (state, payload) => {
 
-  		let c = {
-			_id: payload.conversation_id,
-			nickname: payload.nickname,
-			newMessageCounter: 0,
-			messages:[]
-		}
-  		state.conversations.push(c)
+		let c = state.conversations.find(element=>{
+	    	return element._id == payload.conversation_id
+	    })
+	    if(c == undefined){
+	    	let c = {
+				_id: payload.conversation_id,
+				nickname: payload.nickname,
+				icon: payload.conversation_id,
+				newMessageCounter: 0,
+				messages:[]
+			}
+	  		state.conversations.unshift(c)	
+	    }
+  		
   	},
   	addMessage: (state, message) => {
 		
@@ -329,18 +555,35 @@ export const mutations = {
 				newMessageCounter: 0,
 				messages:[]
     		}
-    		state.conversations.unshift(c)    		
-    	}
-    	c.messages.push(message)
+    		state.conversations.unshift(c)
 
-    	//De aqui en adelande no usar index debia a que se ha reestructurado el arreglo
-    	//Si el mensaje es recibido
-    	if(state.jid == message.to){
-    		//Se incrementa el contador de mensajes nuevos
-    		c.newMessageCounter++	
-    		//Seteamos una alerta pendiente para emitir sonido y/o notificacion
-    		state.alert_pending = true
+    		//Verificar si hay mensajes previos a la misma conversacion
+
+    		let savedMessages = window.localStorage.getItem('M-'+c._id)
+    		if(savedMessages){
+    			c.messages = JSON.parse(savedMessages)
+    		}
+
     	}
+    	let messageIndex = c.messages.findIndex((element)=>{
+    		return element._id == message._id
+    	})
+    	if(messageIndex >= 0){
+    		console.log('messageIndex:'+messageIndex)
+    		c.messages.splice(messageIndex, 1, message)
+    	}else{
+    		c.messages.push(message)
+    	
+	    	//De aqui en adelande no usar index debia a que se ha reestructurado el arreglo
+	    	//Si el mensaje es recibido
+	    	if(state.jid == message.to){
+	    		//Se incrementa el contador de mensajes nuevos
+	    		c.newMessageCounter++	
+	    		//Seteamos una alerta pendiente para emitir sonido y/o notificacion
+	    		state.alert_pending = true
+	    	}
+    	}
+
 
   	},
   	setAlertPending: (state, value) => {
